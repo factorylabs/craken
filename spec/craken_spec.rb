@@ -8,6 +8,48 @@ require 'fileutils'
 describe Craken do
 
   include Craken
+  
+  describe "determine_raketab_files" do
+    context "with default and machine-specific raketab files" do
+      before(:each) do
+        Dir.stub!(:[]).and_return(
+          ["./config/craken/specific_host_raketab", "./config/craken/raketab"]
+        )        
+      end
+      
+      context "on the specific machine" do
+        before(:each) do
+           Craken::HOSTNAME = "specific_host"
+         end
+         it "it should use the machine specific file" do
+           Craken.determine_raketab_files.should == ["./config/craken/specific_host_raketab"]
+         end
+      end
+      
+      context "not on the specific machine" do
+        before(:each) do 
+          Craken::HOSTNAME = "another_host" 
+        end
+
+        it "should use the default raketab file" do
+          Craken.determine_raketab_files.should == ["./config/craken/raketab"]
+        end
+      end
+    end
+ 
+    context "with a machine specific file and no default file" do
+      before(:each) do
+        Dir.stub!(:[]).and_return(
+          ["./config/craken/specific_host_raketab"]
+        )        
+        Craken::HOSTNAME = "another_host" 
+      end
+          
+      it "should return an empty array" do
+        Craken.determine_raketab_files.should == []
+      end  
+    end
+  end
 
   describe "load_and_strip" do
 

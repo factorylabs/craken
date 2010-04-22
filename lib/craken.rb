@@ -3,11 +3,14 @@ require "#{File.dirname(__FILE__)}/raketab"
 
 module Craken
   def self.determine_raketab_files
-    if File.directory?("#{DEPLOY_PATH}/config/craken/") # Use hostname specific raketab first.
-      raketabs = Dir["#{DEPLOY_PATH}/config/craken/*raketab*"].partition {|f| f =~ %r[/raketab.*$] }
-      raketabs.last.empty? ? raketabs.first : raketabs.last.grep(/#{HOSTNAME}_raketab/)
-    else
-      Dir["#{DEPLOY_PATH}/config/raketab*"]
+    raketabs = Dir["#{DEPLOY_PATH}/config/craken/*raketab*"].partition {|f| f =~ %r[/raketab.*$] }
+    
+    # raketabs looks like [[default_file], [specific_file1, specific_file2,...]]
+
+    if (!raketabs.last.empty? && !raketabs.last.grep(/#{HOSTNAME}_raketab/).empty?) 
+      raketabs.last.grep(/#{HOSTNAME}_raketab/)
+    else 
+      raketabs.first
     end
   end
 
